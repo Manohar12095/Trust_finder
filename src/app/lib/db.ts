@@ -14,24 +14,22 @@ export async function registerUser(name: string, password: string): Promise<User
   const { data: existing } = await insforge.database
     .from("users")
     .select()
-    .eq("name", name)
-    .single();
+    .eq("name", name);
 
-  if (existing) {
+  if (existing && existing.length > 0) {
     return null; // User already exists
   }
 
   const { data, error } = await insforge.database
     .from("users")
     .insert([{ name, password }])
-    .select()
-    .single();
+    .select();
 
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     console.error("Error registering user:", error);
     return null;
   }
-  return data as User;
+  return data[0] as User;
 }
 
 export async function loginUser(name: string, password: string): Promise<User | null> {
@@ -39,11 +37,10 @@ export async function loginUser(name: string, password: string): Promise<User | 
     .from("users")
     .select()
     .eq("name", name)
-    .eq("password", password)
-    .single();
+    .eq("password", password);
 
-  if (error || !data) return null;
-  return data as User;
+  if (error || !data || data.length === 0) return null;
+  return data[0] as User;
 }
 
 export async function updateUserQuizShareId(userId: string, shareId: string) {
@@ -57,11 +54,10 @@ export async function getUserById(userId: string): Promise<User | null> {
   const { data, error } = await insforge.database
     .from("users")
     .select()
-    .eq("id", userId)
-    .single();
+    .eq("id", userId);
 
-  if (error || !data) return null;
-  return data as User;
+  if (error || !data || data.length === 0) return null;
+  return data[0] as User;
 }
 
 // Get leaderboard for a user's quiz via their stored quiz_share_id
