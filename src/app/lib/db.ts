@@ -10,16 +10,6 @@ export interface User {
 }
 
 export async function registerUser(name: string, password: string): Promise<User | null> {
-  // Check if user already exists
-  const { data: existing } = await insforge.database
-    .from("users")
-    .select()
-    .eq("name", name);
-
-  if (existing && existing.length > 0) {
-    return null; // User already exists
-  }
-
   const { data, error } = await insforge.database
     .from("users")
     .insert([{ name, password }])
