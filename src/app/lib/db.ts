@@ -1,5 +1,85 @@
 import { insforge } from "../insforge-client";
 
+// ====== User Auth ======
+export interface User {
+  id: string;
+  name: string;
+  password: string;
+  quiz_share_id: string | null;
+  created_at: string;
+}
+
+export async function registerUser(name: string, password: string): Promise<User | null> {
+  // Check if user already exists
+  const { data: existing } = await insforge.database
+    .from("users")
+    .select()
+    .eq("name", name)
+    .single();
+
+  if (existing) {
+    return null; // User already exists
+  }
+
+  const { data, error } = await insforge.database
+    .from("users")
+    .insert([{ name, password }])
+    .select()
+    .single();
+
+  if (error || !data) {
+    console.error("Error registering user:", error);
+    return null;
+  }
+  return data as User;
+}
+
+export async function loginUser(name: string, password: string): Promise<User | null> {
+  const { data, error } = await insforge.database
+    .from("users")
+    .select()
+    .eq("name", name)
+    .eq("password", password)
+    .single();
+
+  if (error || !data) return null;
+  return data as User;
+}
+
+export async function updateUserQuizShareId(userId: string, shareId: string) {
+  await insforge.database
+    .from("users")
+    .update({ quiz_share_id: shareId })
+    .eq("id", userId);
+}
+
+export async function getUserById(userId: string): Promise<User | null> {
+  const { data, error } = await insforge.database
+    .from("users")
+    .select()
+    .eq("id", userId)
+    .single();
+
+  if (error || !data) return null;
+  return data as User;
+}
+
+// Get leaderboard for a user's quiz via their stored quiz_share_id
+export async function getUserLeaderboard(userId: string) {
+  // First get the user to find their quiz_share_id
+  const user = await getUserById(userId);
+  if (!user || !user.quiz_share_id) return { quiz: null, attempts: [] };
+
+  // Look up the quiz by share_id
+  const quiz = await getQuizByShareId(user.quiz_share_id);
+  if (!quiz) return { quiz: null, attempts: [] };
+
+  const attempts = await getLeaderboard(quiz.id);
+  return { quiz, attempts };
+}
+
+// ====== Quiz Types ======
+
 export interface Quiz {
   id: string;
   share_id: string;
@@ -36,20 +116,25 @@ export async function createQuiz(
   creatorName: string,
   gender: string,
   questionIds: number[],
-  answers: { questionId: number; selectedOption: "A" | "B" }[]
+  answers: { questionId: number; selectedOption: "A" | "B" }[],
+  userId?: string
 ) {
   const shareId = generateShareId();
 
+  const insertData: Record<string, unknown> = {
+    share_id: shareId,
+    creator_name: creatorName,
+    gender,
+    question_ids: questionIds,
+  };
+
+  if (userId) {
+    insertData.user_id = userId;
+  }
+
   const { data: quiz, error: quizError } = await insforge.database
     .from("quizzes")
-    .insert([
-      {
-        share_id: shareId,
-        creator_name: creatorName,
-        gender,
-        question_ids: questionIds,
-      },
-    ])
+    .insert([insertData])
     .select()
     .single();
 
@@ -71,6 +156,11 @@ export async function createQuiz(
   if (answersError) {
     console.error("Error saving answers:", answersError);
     return null;
+  }
+
+  // Update user's quiz_share_id
+  if (userId) {
+    await updateUserQuizShareId(userId, shareId);
   }
 
   return { ...quiz, share_id: shareId } as Quiz;

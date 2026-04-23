@@ -219,6 +219,145 @@
     @apply relative inline-block;
     background: linear-gradient(180deg, transparent 40%, rgba(255, 209, 102, 0.5) 40%);
   }
+
+  /* ====== Scoreboard banner ====== */
+  .scoreboard-banner {
+    @apply flex items-center justify-center gap-3 w-full py-5 rounded-t-3xl;
+    background: linear-gradient(135deg, #ffd166, #ffb347);
+    box-shadow: 0 4px 16px rgba(255, 179, 71, 0.3);
+  }
+
+  /* Leaderboard entry card */
+  .leaderboard-entry {
+    @apply flex items-center gap-3 rounded-xl px-4 py-3;
+    @apply transition-all duration-200;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    border-left: 4px solid transparent;
+  }
+
+  .leaderboard-entry:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  .leaderboard-rank {
+    @apply flex items-center justify-center;
+    min-width: 40px;
+  }
+
+  .rank-number {
+    @apply flex items-center justify-center w-9 h-9 rounded-full text-sm font-bold;
+    border: 2px solid;
+    font-family: var(--font-heading);
+    background: white;
+  }
+
+  /* Leaderboard progress bar */
+  .leaderboard-progress-track {
+    @apply w-full h-2 rounded-full overflow-hidden;
+    background: #f3f4f6;
+  }
+
+  .leaderboard-progress-fill {
+    @apply h-full rounded-full;
+  }
+
+  /* ====== Score Reveal ====== */
+  .score-reveal-bg {
+    @apply flex flex-col items-center justify-center py-10 px-6 rounded-3xl;
+    background: linear-gradient(160deg, #8b6cf6 0%, #6c4ce0 40%, #7c5cfc 70%, #9b82ff 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-reveal-bg::before {
+    content: '✨';
+    position: absolute;
+    top: 12px;
+    left: 20px;
+    font-size: 2rem;
+    animation: sparkle 1.5s ease-in-out infinite;
+    opacity: 0.6;
+  }
+
+  .score-reveal-bg::after {
+    content: '✨';
+    position: absolute;
+    bottom: 16px;
+    right: 24px;
+    font-size: 1.5rem;
+    animation: sparkle 1.5s ease-in-out infinite 0.5s;
+    opacity: 0.4;
+  }
+
+  .score-3d {
+    @apply flex items-baseline justify-center;
+  }
+
+  .score-3d-number {
+    font-size: 7rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: var(--font-heading);
+    color: #ff6bb5;
+    text-shadow:
+      0 4px 0 #d94f8f,
+      0 8px 0 #c43c7f,
+      0 12px 20px rgba(0, 0, 0, 0.15);
+    -webkit-text-stroke: 2px #e05595;
+  }
+
+  .score-3d-total {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    font-family: var(--font-heading);
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  /* ====== Chat Bubbles ====== */
+  .chat-bubble-right {
+    @apply self-end rounded-2xl rounded-br-sm px-5 py-3 max-w-[80%];
+    background: linear-gradient(135deg, var(--color-accent-cyan), #3dc7a8);
+    position: relative;
+  }
+
+  .chat-name-right {
+    @apply block text-xs mt-1 text-right;
+    color: rgba(255, 255, 255, 0.7);
+    font-family: var(--font-body);
+  }
+
+  .chat-bubble-left {
+    @apply self-start rounded-2xl rounded-bl-sm px-5 py-3 max-w-[80%];
+    background: #fef3c7;
+    position: relative;
+  }
+
+  .chat-name-left {
+    @apply block text-xs mt-1;
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+  }
+
+  /* Leaderboard button on homepage */
+  .leaderboard-btn {
+    @apply flex items-center justify-center gap-3 py-4 px-8 rounded-2xl text-white;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-[1.02] active:scale-[0.97];
+    background: linear-gradient(135deg, #ffd166, #ff9f43);
+    box-shadow: 0 6px 20px rgba(255, 159, 67, 0.35);
+    font-family: var(--font-heading);
+    cursor: pointer;
+    border: none;
+    color: var(--color-text-dark);
+  }
+
+  .leaderboard-btn:hover {
+    box-shadow: 0 8px 28px rgba(255, 159, 67, 0.5);
+  }
 }
 
 @layer utilities {

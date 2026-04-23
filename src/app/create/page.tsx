@@ -23,10 +23,19 @@ export default function CreatePage() {
   >([]);
   const [shareUrl, setShareUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Initialize random questions on mount
+  // Initialize random questions and check login
   useEffect(() => {
     setQuestions(getRandomQuestions(10));
+    const stored = localStorage.getItem("trustmenot_user");
+    if (stored) {
+      try {
+        const u = JSON.parse(stored);
+        setUserId(u.id);
+        if (!name) setName(u.name || "");
+      } catch {}
+    }
   }, []);
 
   const handleNameContinue = () => {
@@ -96,7 +105,8 @@ export default function CreatePage() {
         name.trim(),
         gender || "male",
         questionIds,
-        finalAnswers
+        finalAnswers,
+        userId || undefined
       );
 
       if (quiz) {

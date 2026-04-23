@@ -194,14 +194,21 @@ export default function TakeQuizPage({
     setStep("result");
   };
 
-  const getTrustLevel = () => {
-    const pct = (score / quizQuestions.length) * 100;
-    if (pct >= 90) return { text: "Best Friend! 💕", emoji: "🥇", desc: "You truly know them!" };
-    if (pct >= 70) return { text: "True Friend ✨", emoji: "🎉", desc: "Pretty close!" };
-    if (pct >= 50) return { text: "Okay Friend 😏", emoji: "🤷", desc: "You know some things..." };
-    if (pct >= 30) return { text: "Suspicious! 🤨", emoji: "😬", desc: "Do you even know them?" };
-    return { text: "Fake Friend! 💔", emoji: "👻", desc: "You don't know them at all!" };
-  };
+  // Fire confetti on result
+  useEffect(() => {
+    if (step === "result") {
+      import("canvas-confetti").then((confettiModule) => {
+        const confetti = confettiModule.default;
+        // Initial burst
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.3 } });
+        // Side bursts
+        setTimeout(() => {
+          confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0 } });
+          confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1 } });
+        }, 500);
+      }).catch(() => {});
+    }
+  }, [step]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -349,49 +356,138 @@ export default function TakeQuizPage({
             </motion.div>
           )}
 
-          {/* Results */}
+          {/* Results — Dramatic Score Reveal */}
           {step === "result" && (
             <motion.div
               key="result"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, type: "spring" }}
-              className="w-full max-w-md flex flex-col items-center gap-6 pt-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="w-full max-w-md flex flex-col items-center gap-0"
             >
-              <div className="text-6xl animate-bounce-gentle">
-                {getTrustLevel().emoji}
+              {/* Purple gradient score section */}
+              <div className="score-reveal-bg w-full">
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xl font-bold text-white/80 mb-2"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  your score
+                </motion.p>
+
+                {/* Giant 3D score */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -10 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", bounce: 0.5, duration: 0.8, delay: 0.3 }}
+                  className="score-3d"
+                >
+                  <span className="score-3d-number">{score}</span>
+                  <span className="score-3d-total">/{quizQuestions.length}</span>
+                </motion.div>
+
+                {/* Reaction emoji */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", delay: 0.8 }}
+                  className="text-6xl mt-4"
+                >
+                  {score >= 9 ? "🥰" : score >= 7 ? "😎" : score >= 5 ? "🤨" : score >= 3 ? "😟" : "💀"}
+                </motion.div>
               </div>
 
-              <div className="score-badge animate-pulse-scale">
-                {score}/{quizQuestions.length}
+              {/* Chat messages */}
+              <div className="w-full px-4 pt-6 pb-4 flex flex-col gap-3">
+                {/* Creator message — right */}
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.2 }}
+                  className="chat-bubble-right"
+                >
+                  <p className="font-bold text-white text-sm">
+                    {score >= 7
+                      ? `so, do you trust me now? 😇`
+                      : score >= 4
+                      ? `hmm, do you even know me? 🤔`
+                      : `you don't know me at all! 😤`}
+                  </p>
+                  <span className="chat-name-right">{creatorName}</span>
+                </motion.div>
+
+                {/* Friend message — left */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.8 }}
+                  className="chat-bubble-left"
+                >
+                  <p className="font-bold text-sm" style={{ color: "var(--color-text-dark)" }}>
+                    {score >= 7
+                      ? `okay... I trust you now 😘`
+                      : score >= 4
+                      ? `let me try again! 😅`
+                      : `oops... sorry! 🫣`}
+                  </p>
+                  <span className="chat-name-left">{friendName}</span>
+                </motion.div>
               </div>
 
-              <h2
-                className="text-2xl font-bold text-center"
-                style={{ fontFamily: "var(--font-heading)" }}
+              {/* Mascot */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.2 }}
+                className="text-6xl mb-4"
               >
-                {getTrustLevel().text}
-              </h2>
-              <p
-                className="text-center"
-                style={{ color: "var(--color-text-muted)" }}
+                🤩
+              </motion.div>
+
+              {/* Trust level card + CTAs */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 2.5 }}
+                className="w-full px-4"
               >
-                {getTrustLevel().desc}
-              </p>
+                <div className="card w-full text-center">
+                  <p className="text-sm mb-1" style={{ color: "var(--color-text-muted)" }}>
+                    trust level
+                  </p>
+                  <p
+                    className="text-lg font-bold mb-4"
+                    style={{
+                      fontFamily: "var(--font-heading)",
+                      color: score >= 7 ? "#22c55e" : score >= 4 ? "#f59e0b" : "#ef4444",
+                    }}
+                  >
+                    {score >= 9
+                      ? "💕 Best Friend!"
+                      : score >= 7
+                      ? "✨ Mostly Safe"
+                      : score >= 5
+                      ? "😟 Not Sure"
+                      : score >= 3
+                      ? "🚩 Seems Fake"
+                      : "💀 Don't Trust"}
+                  </p>
 
-              <div className="card w-full text-center">
-                <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
-                  {friendName}, you scored <strong>{score}</strong> out of{" "}
-                  <strong>{quizQuestions.length}</strong> on{" "}
-                  <strong>{creatorName}</strong>&apos;s quiz!
-                </p>
-
-                <a href="/" className="block">
-                  <button className="btn-primary">
-                    Create Your Own Quiz ✨
-                  </button>
-                </a>
-              </div>
+                  <div className="flex flex-col gap-3">
+                    <a href={`/quiz/${shareId}/results`} className="block">
+                      <button className="btn-secondary w-full">
+                        View Scoreboard 🏆
+                      </button>
+                    </a>
+                    <a href="/" className="block">
+                      <button className="btn-primary">
+                        Create Your Own Quiz ✨
+                      </button>
+                    </a>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -399,3 +495,4 @@ export default function TakeQuizPage({
     </div>
   );
 }
+
